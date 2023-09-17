@@ -1,0 +1,183 @@
+
+/*Este comando crea una nueva base de datos llamada "jsontest" en 
+MariaDB con el conjunto de caracteres "utf8mb4" y la colación "utf8mb4_unicode_ci" configurados.*/
+
+CREATE DATABASE jsonte st CHARACTER 
+SET utf8mb4 COLLATE 
+utf8mb4_unicode_ci;
+
+/**/
+
+CREATE TABLE test (
+ id BIGINT AUTO_INCREMENT
+, jsondata JSON check (
+JSON_VALID(jsondata) )
+, CONSTRAINT pktest PRIMARY KEY (id)
+);
+
+/**/
+
+INSERT INTO test (jsondata)
+VALUES ('{
+  "books": {
+    "book": [
+      {
+        "category": "JAVA",
+        "title": {
+          "lang": "en",
+          "#text": "Learn Java in 24 Hours"
+        },
+        "author": "Robert",
+        "year": "2005",
+        "price": "30.00"
+      },
+      {
+        "category": "DOTNET",
+        "title": {
+          "lang": "en",
+          "#text": "Learn .Net in 24 hours"
+        },
+        "author": "Peter",
+        "year": "2011",
+        "price": "40.50"
+      },
+      {
+        "category": "XML",
+        "title": {
+          "lang": "en",
+          "#text": "Learn XQuery in 24 hours"
+        },
+        "author": [
+          "Robert",
+          "Peter"
+        ],
+        "year": "2013",
+        "price": "50.00"
+      },
+      {
+        "category": "XML",
+        "title": {
+          "lang": "en",
+          "#text": "Learn XPath in 24 hours"
+        },
+        "author": "Jay Ban",
+        "year": "2010",
+        "price": "16.50"
+      },
+      {
+        "category": "DB",
+        "title": "Oracle Expert 21",
+        "author": "Burleson",
+        "year": "2022 ",
+        "price": "40"
+      },
+      {
+        "category": "Child",
+        "title": {
+          "lang": "en",
+          "#text": "ABC"
+        },
+        "author": "Author Name",
+        "year": "2020",
+        "price": "100.00"
+      },
+      {
+        "category": "IT",
+        "title": {
+          "lang": "en",
+          "#text": "XQuery Book"
+        },
+        "author": [
+          "Author 1",
+          "Author 2"
+        ],
+        "year": "2005",
+        "price": "300.00"
+      },
+      {
+        "category": "Science",
+        "title": {
+          "lang": "en",
+          "#text": "Ecosystem"
+        },
+        "author": "Author Name",
+        "year": "2010",
+        "price": "250.00"
+      },
+      {
+        "category": "GK",
+        "title": {
+          "lang": "en",
+          "#text": "Current Affairs"
+        },
+        "author": "Author Name",
+        "year": "2004",
+        "price": "500.00"
+      },
+      {
+        "category": "Science",
+        "title": {
+          "lang": "en",
+          "#text": "Science Book"
+        },
+        "author": [
+          "Author 1",
+          "Author 2",
+          "Author 3"
+        ],
+        "year": "2011",
+        "price": "150.00"
+      }
+    ]
+  }
+}
+');
+
+
+SELECT id,JSON_VALUE( jsondata,
+'$.books.book[4].category') AS
+Category FROM test;
+
+SELECT id, JSON_QUERY(jsondata,
+'$.books.book') AS Book
+FROM test;
+
+
+UPDATE test
+SET jsondata =
+JSON_ARRAY_APPEND(jsondata,'$.books.book',
+JSON_COMPACT('{"category":"Programming",
+"title": {"lang": "en", "#text": "Clean Code"},
+"author": ["Robert Cecil Martin","Martin
+Fowler"],
+"year": "2022","price": "150.00"}'))
+WHERE id = 1;
+
+
+SELECT t.id, js.category
+FROM test t,
+JSON_TABLE( t.jsondata,
+'$.books.book[*]' COLUMNS(
+category VARCHAR(100) PATH '$.category')
+) AS js;
+
+
+
+SELECT t.id, js.title, js.category, js.author
+FROM test t,
+JSON_TABLE( t.jsondata,
+'$.books.book[*]' COLUMNS(
+category VARCHAR(100) PATH '$.category',
+title VARCHAR(100) PATH '$.title.#text',
+NESTED PATH '$.author[*]'
+COLUMNS (author VARCHAR(100) PATH '$'
+) )) AS js;
+
+
+
+
+
+
+
+
+
